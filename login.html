@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gyalsung Employment Management System - Login</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;--primary:#2563eb;}
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(135deg,#0f172a,#1f2937);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:420px;background:rgba(17,24,39,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);padding:24px}
+    h1{font-size:22px;margin:0 0 16px;color:#fff;text-align:center}
+    .field{margin:12px 0}
+    label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+    input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #30363d;background:#0b1220;color:#e5e7eb;outline:none}input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.2)}
+    .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:14px;color:var(--muted)}
+    button{width:100%;margin-top:16px;padding:12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer}button:disabled{opacity:.6;cursor:not-allowed}
+    .error{color:#fca5a5;font-size:13px;height:18px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="card" role="form" aria-labelledby="title">
+    <h1 id="title">Gyalsung Employment Management System - Login</h1>
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="username" required placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" autocomplete="current-password" required placeholder="••••••••">
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="remember"> Remember me</label>
+      <a href="#" style="color:var(--primary);text-decoration:none">Forgot?</a>
+    </div>
+    <button id="loginBtn" disabled>Sign In</button>
+    <div id="error" class="error" aria-live="polite"></div>
+  </div>
+  <script>
+    const email=document.getElementById('email');
+    const password=document.getElementById('password');
+    const remember=document.getElementById('remember');
+    const btn=document.getElementById('loginBtn');
+    const err=document.getElementById('error');
+    function validate(){
+      const ok= email.value.includes('@') && password.value.length>=6;
+      btn.disabled=!ok;
+      err.textContent = ok? '' : 'Enter a valid email and a password with at least 6 characters.';
+    }
+    email.addEventListener('input', validate);
+    password.addEventListener('input', validate);
+    btn.addEventListener('click',()=>{
+      alert('Login submitted: '+email.value+' | remember='+remember.checked);
+    });
+    validate();
+  </script>
+</body>
+</html>
