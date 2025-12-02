@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#9ca3af;--primary:#f59e0b;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;
+      --card:#0b1220;--border:#30363d
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:#0b1220;color:var(--text);min-height:100vh;display:flex}
+    .sidebar{width:260px;background:#0a0f1c;border-right:1px solid rgba(255,255,255,0.06);padding:20px;position:sticky;top:0;height:100vh}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 12px rgba(245,158,11,.6)}
+    .brand h1{font-size:18px;margin:0}
+    .nav a{display:block;padding:10px 12px;border-radius:8px;color:var(--text);text-decoration:none;margin:6px 0}
+    .nav a.active,.nav a:hover{background:#0f172a; outline: 1px solid rgba(245,158,11,0.4)}
+
+    .content{flex:1;display:flex;flex-direction:column}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(245,158,11,0.35);background:#0a0f1c;position:sticky;top:0}
+    header h2{margin:0;font-size:18px}
+
+    .grid{display:grid;grid-template-columns:repeat(4, minmax(220px,1fr));gap:16px;padding:20px}
+    .card{background:#0b1220;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px}
+    .card h3{margin:0 0 8px;font-size:14px;color:var(--muted)}
+    .kpi{font-size:28px;font-weight:700;margin:0}
+
+    .row{display:grid;grid-template-columns:2fr 1.2fr;gap:16px;padding:0 20px 20px}
+
+    .panel{background:#0b1220;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px}
+    .panel h3{margin:0 0 12px;font-size:16px}
+
+    .progress{height:10px;background:#111827;border-radius:999px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg, var(--primary), #fbbf24)}
+
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;font-size:14px}
+    th{color:var(--muted);font-weight:600}
+
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+    .pill.good{background:rgba(34,197,94,.15);color:#86efac}
+    .pill.warn{background:rgba(245,158,11,.15);color:#fde68a}
+    .pill.bad{background:rgba(239,68,68,.15);color:#fca5a5}
+
+    @media (max-width: 1000px){
+      .grid{grid-template-columns:repeat(2, minmax(200px,1fr))}
+      .row{grid-template-columns:1fr}
+      .sidebar{position:fixed;transform:translateX(-100%);z-index:20}
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>Admin</h1>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Employees</a>
+      <a href="#">Departments</a>
+      <a href="#">Attendance</a>
+      <a href="#">Payroll</a>
+      <a href="#">Settings</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header>
+      <h2>Dashboard Overview</h2>
+      <div>
+        <span id="welcomeUser" style="color:var(--muted);font-size:14px">Welcome, Admin</span>
+      </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="grid">
+      <div class="card">
+        <h3>Total Employees</h3>
+        <p class="kpi" id="kpiEmployees">0</p>
+      </div>
+      <div class="card">
+        <h3>Departments</h3>
+        <p class="kpi" id="kpiDepartments">0</p>
+      </div>
+      <div class="card">
+        <h3>Attendance Today</h3>
+        <p class="kpi" id="kpiAttendance">0%</p>
+      </div>
+      <div class="card">
+        <h3>Salary Processed</h3>
+        <p class="kpi" id="kpiSalary">0%</p>
+      </div>
+    </section>
+
+    <section class="row">
+      <!-- Salary Progress -->
+      <div class="panel">
+        <h3>Salary Processing Progress</h3>
+        <div class="progress" aria-label="Salary progress">
+          <div id="salaryBar" class="bar" style="width:0%"></div>
+        </div>
+        <p style="margin-top:8px;color:var(--muted)"><span id="salaryPct">0</span>% of salaries processed this month</p>
+      </div>
+
+      <!-- Attendance Summary -->
+      <div class="panel">
+        <h3>Attendance Summary (Today)</h3>
+        <table>
+          <thead>
+            <tr><th>Status</th><th>Count</th></tr>
+          </thead>
+          <tbody id="attendanceTable">
+            <tr><td>Present</td><td>0</td></tr>
+            <tr><td>Absent</td><td>0</td></tr>
+            <tr><td>On Leave</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Departments -->
+    <section class="panel" style="margin:0 20px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h3 style="margin:0">Departments</h3>
+        <div style="display:flex;gap:8px">
+          <button id="btnAdd" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(245,158,11,0.5);background:#0f172a;color:#fbbf24;cursor:pointer">ADD NEW Employee</button>
+          <button id="btnRead" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0f172a;color:#e5e7eb;cursor:pointer">Read</button>
+          <button id="btnUpdate" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0f172a;color:#e5e7eb;cursor:pointer">Update</button>
+          <button id="btnDelete" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0f172a;color:#e5e7eb;cursor:pointer">Delete</button>
+        </div>
+      </div>
+      <table style="margin-top:12px">
+        <thead>
+          <tr><th>Department</th><th>Headcount</th><th>Trend</th></tr>
+        </thead>
+        <tbody id="deptTable">
+          <tr><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <script>
+    // Demo in-memory data for the dashboard
+    const demoData = {
+      employees: [
+        { id: 'EMP12345', name: 'Alice', dept: 'Engineering', status: 'Present', salaryProcessed: true },
+        { id: 'EMP67890', name: 'Bob', dept: 'HR', status: 'Present', salaryProcessed: true },
+        { id: 'EMP00001', name: 'Charlie', dept: 'Finance', status: 'On Leave', salaryProcessed: false },
+        { id: 'EMP00002', name: 'Dawa', dept: 'Engineering', status: 'Absent', salaryProcessed: false },
+        { id: 'EMP00003', name: 'Karma', dept: 'Operations', status: 'Present', salaryProcessed: true }
+      ]
+    };
+
+    function renderKPIs(data){
+      const total = data.employees.length;
+      const departments = new Set(data.employees.map(e=>e.dept));
+      const present = data.employees.filter(e=>e.status==='Present').length;
+      const absent = data.employees.filter(e=>e.status==='Absent').length;
+      const onLeave = data.employees.filter(e=>e.status==='On Leave').length;
+      const processed = data.employees.filter(e=>e.salaryProcessed).length;
+
+      const attendancePct = Math.round((present/total)*100);
+      const salaryPct = Math.round((processed/total)*100);
+
+      document.getElementById('kpiEmployees').textContent = total;
+      document.getElementById('kpiDepartments').textContent = departments.size;
+      document.getElementById('kpiAttendance').textContent = attendancePct + '%';
+      document.getElementById('kpiSalary').textContent = salaryPct + '%';
+
+      document.getElementById('salaryBar').style.width = salaryPct + '%';
+      document.getElementById('salaryPct').textContent = salaryPct;
+
+      // Attendance table
+      const tbody = document.getElementById('attendanceTable');
+      tbody.innerHTML = '';
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Present</td><td><span class="pill good">${present}</span></td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Absent</td><td><span class="pill bad">${absent}</span></td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>On Leave</td><td><span class="pill warn">${onLeave}</span></td></tr>`);
+
+      // Department table
+      const deptCounts = [...departments].map(d=>({
+        name:d,
+        count: data.employees.filter(e=>e.dept===d).length
+      })).sort((a,b)=>b.count-a.count);
+
+      const deptBody = document.getElementById('deptTable');
+      deptBody.innerHTML = '';
+      deptCounts.forEach(d=>{
+        const trend = d.count > 3 ? 'Growing' : (d.count === 3 ? 'Stable' : 'Hiring');
+        const pillClass = d.count > 3 ? 'good' : (d.count === 3 ? 'warn' : 'bad');
+        deptBody.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${d.name}</td>
+            <td>${d.count}</td>
+            <td><span class="pill ${pillClass}">${trend}</span></td>
+          </tr>
+        `);
+      });
+    }
+
+    // Auth greeting and guard
+    (function(){
+      const id = sessionStorage.getItem('authEmployeeId');
+      if (!id) {
+        // If not logged in, redirect to login page
+        window.location.replace('login.html');
+        return;
+      }
+      const welcome = document.getElementById('welcomeUser');
+      if (welcome) welcome.textContent = `Welcome, ${id}`;
+    })();
+
+    function refresh(){
+      renderKPIs(demoData);
+    }
+
+    // Basic CRUD for employees via prompts (demo only)
+    document.getElementById('btnAdd').addEventListener('click', ()=>{
+      // Navigate to the Add New Employee form page
+      window.location.href = 'add-employee.html';
+    });
+
+    document.getElementById('btnRead').addEventListener('click', ()=>{
+      const id = prompt('Enter Employee ID to view:');
+      if (!id) return;
+      const e = demoData.employees.find(x=>x.id===id);
+      if (!e) { alert('Not found'); return; }
+      alert(`ID: ${e.id}\nName: ${e.name}\nDepartment: ${e.dept}\nStatus: ${e.status}\nSalary Processed: ${e.salaryProcessed ? 'Yes':'No'}`);
+    });
+
+    document.getElementById('btnUpdate').addEventListener('click', ()=>{
+      const id = prompt('Enter Employee ID to update:');
+      if (!id) return;
+      const e = demoData.employees.find(x=>x.id===id);
+      if (!e) { alert('Not found'); return; }
+      const name = prompt('Enter name:', e.name) ?? e.name;
+      const dept = prompt('Enter department:', e.dept) ?? e.dept;
+      const status = prompt('Status (Present/Absent/On Leave):', e.status) ?? e.status;
+      const salaryProcessed = confirm('Mark salary processed? OK=Yes, Cancel=No');
+      e.name = name || e.name;
+      e.dept = dept || e.dept;
+      e.status = status || e.status;
+      e.salaryProcessed = salaryProcessed;
+      refresh();
+    });
+
+    document.getElementById('btnDelete').addEventListener('click', ()=>{
+      const id = prompt('Enter Employee ID to delete:');
+      if (!id) return;
+      const idx = demoData.employees.findIndex(x=>x.id===id);
+      if (idx === -1) { alert('Not found'); return; }
+      if (confirm(`Delete employee ${id}?`)) {
+        demoData.employees.splice(idx,1);
+        refresh();
+      }
+    });
+
+    renderKPIs(demoData);
+  </script>
+</body>
+</html>
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
+

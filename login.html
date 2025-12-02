@@ -6,8 +6,8 @@
   <title>Gyalsung Employment Management System - Login</title>
   <style>
     :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;--primary:#2563eb;}
-    *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(135deg,#0f172a,#1f2937);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .card{width:100%;max-width:420px;background:rgba(17,24,39,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);padding:24px}
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:DarkOrange;color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:420px;background:darkblue;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);padding:24px}
     h1{font-size:22px;margin:0 0 16px;color:#fff;text-align:center}
     .field{margin:12px 0}
     label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
@@ -21,12 +21,12 @@
   <div class="card" role="form" aria-labelledby="title">
     <h1 id="title">Gyalsung Employment Management System - Login</h1>
     <div class="field">
-      <label for="email">Email</label>
-      <input type="email" id="email" autocomplete="username" required placeholder="you@example.com">
+      <label for="employeeId">Employee ID</label>
+      <input type="text" id="employeeId" autocomplete="username" required placeholder="e.g., EMP12345">
     </div>
-    <div class="field">
+    <div class="field" style="display:none">
       <label for="password">Password</label>
-      <input type="password" id="password" autocomplete="current-password" required placeholder="••••••••">
+      <input type="password" id="password" autocomplete="current-password" placeholder="••••••••">
     </div>
     <div class="row">
       <label><input type="checkbox" id="remember"> Remember me</label>
@@ -36,21 +36,47 @@
     <div id="error" class="error" aria-live="polite"></div>
   </div>
   <script>
-    const email=document.getElementById('email');
+    const employeeId=document.getElementById('employeeId');
     const password=document.getElementById('password');
     const remember=document.getElementById('remember');
     const btn=document.getElementById('loginBtn');
     const err=document.getElementById('error');
+
+    // In-memory users store: Employee IDs (no passwords required)
+    const users = new Set([
+      'EMP12345',
+      'EMP67890',
+      'EMP00001'
+    ]);
+
     function validate(){
-      const ok= email.value.includes('@') && password.value.length>=6;
+      const ok= employeeId.value.trim().length>0;
       btn.disabled=!ok;
-      err.textContent = ok? '' : 'Enter a valid email and a password with at least 6 characters.';
+      err.textContent = ok? '' : 'Enter your Employee ID to continue.';
     }
-    email.addEventListener('input', validate);
+
+    employeeId.addEventListener('input', validate);
     password.addEventListener('input', validate);
-    btn.addEventListener('click',()=>{
-      alert('Login submitted: '+email.value+' | remember='+remember.checked);
+
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const id = employeeId.value.trim();
+      const allowed = users.has(id);
+      if (allowed) {
+        // Persist session for this tab
+        sessionStorage.setItem('authEmployeeId', id);
+        if (remember.checked) {
+          // Persist a flag to auto-fill next time (demo only)
+          localStorage.setItem('rememberEmployeeId', id);
+        }
+        // Redirect to admin dashboard
+        window.location.href = 'admin-dashboard.html';
+      } else {
+        err.style.color = '#fca5a5';
+        err.textContent = 'Invalid or unknown Employee ID.';
+      }
     });
+
     validate();
   </script>
 </body>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Employee</title>
+  <style>
+    :root{
+      --bg:#0f172a;         /* slate-900 */
+      --panel:#111827;      /* gray-900 */
+      --muted:#94a3b8;      /* slate-400 */
+      --text:#e5e7eb;       /* gray-200 */
+      --accent:#f59e0b;     /* orange-500 */
+      --accent-600:#d97706; /* orange-600 */
+      --ring:#fbbf24;       /* orange-400 */
+      --danger:#ef4444;     /* red-500 */
+      --success:#22c55e;    /* green-500 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background:linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      color:var(--text);
+      min-height:100vh; display:flex; flex-direction:column;
+    }
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 24px; border-bottom:1px solid #1f2937; background:rgba(17,24,39,.7); backdrop-filter: blur(8px);
+      position:sticky; top:0; z-index:10;
+    }
+    .brand{display:flex; gap:10px; align-items:center; font-weight:700}
+    .brand .dot{width:10px; height:10px; border-radius:999px; background:var(--accent); box-shadow:0 0 16px rgba(245,158,11,.6)}
+    a.btn-link{color:var(--text); text-decoration:none; border:1px solid #1f2937; padding:8px 12px; border-radius:8px}
+    a.btn-link:hover{border-color:#334155}
+
+    main{ width:100%; max-width:1000px; margin:32px auto; padding:0 16px; }
+
+    .card{
+      background:linear-gradient(180deg, rgba(17,24,39,.9), rgba(15,23,42,.9));
+      border:1px solid #1f2937; border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .card-header{ padding:20px 24px; border-bottom:1px solid #1f2937; display:flex; align-items:center; justify-content:space-between }
+    .card-title{ font-size:20px; font-weight:700 }
+    .card-sub{ color:var(--muted); font-size:13px; margin-top:6px }
+
+    form{ padding:24px; }
+    .grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:16px }
+    .col-6{ grid-column: span 6 }
+    .col-12{ grid-column: span 12 }
+    @media (max-width: 800px){ .col-6{ grid-column: span 12 } }
+
+    label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px }
+    input, select, textarea{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:var(--text);
+      outline:none; transition:border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus{ border-color:var(--accent-600); box-shadow:0 0 0 3px rgba(251,191,36,.18) }
+    .hint{ font-size:12px; color:#7aa2b8; margin-top:6px }
+    .err{ font-size:12px; color:var(--danger); margin-top:6px; display:none }
+    .row{ display:flex; gap:12px; align-items:center; color:var(--muted); font-size:13px }
+
+    .actions{ display:flex; gap:12px; justify-content:flex-end; padding:16px 24px; border-top:1px solid #1f2937; background:#0b1220 }
+    .btn{ padding:10px 14px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:var(--text); cursor:pointer }
+    .btn:hover{ border-color:#334155 }
+    /* Keep form orange, but restore button to cyan theme */
+    .btn.primary{ background:linear-gradient(180deg, #06b6d4, #0891b2); border-color:transparent }
+    .btn.primary:disabled{ opacity:.6; cursor:not-allowed }
+    .req::after{ content:" *"; color:var(--danger) }
+
+    .status{ font-size:12px; color:var(--muted) }
+    .success{ color:var(--success); display:none }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <span>Admin • HR</span>
+    </div>
+    <nav>
+      <a class="btn-link" href="admin-dashboard.html">← Back to Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="card-title">
+      <div class="card-header">
+        <div>
+          <div id="card-title" class="card-title">Add New Employee</div>
+          <div class="card-sub">Enter employee details and submit to create a new record.</div>
+        </div>
+        <div class="status">
+          <span id="saveStatus" class="success">Saved</span>
+        </div>
+      </div>
+
+      <form id="employeeForm" novalidate>
+        <div class="grid">
+          <div class="col-6">
+            <label for="fullName" class="req">Full Name</label>
+            <input id="fullName" name="fullName" type="text" placeholder="Jane Doe" required minlength="2" />
+            <div class="err" data-for="fullName">Please enter a valid name (min 2 characters).</div>
+          </div>
+          <div class="col-6">
+            <label for="employeeId" class="req">EMPID</label>
+            <input id="employeeId" name="employeeId" type="text" placeholder="EMP-00123" required pattern="^[A-Za-z0-9-]+$" />
+            <div class="err" data-for="employeeId">EMPID can contain letters, numbers, and dashes only.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="email" class="req">Email</label>
+            <input id="email" name="email" type="email" placeholder="jane.doe@company.com" required />
+            <div class="err" data-for="email">Please enter a valid email.</div>
+          </div>
+          <div class="col-6">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="+1 555 123 4567" pattern="^[0-9+()\-\s]{7,}$" />
+            <div class="err" data-for="phone">Enter a valid phone number.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="department" class="req">Department</label>
+            <select id="department" name="department" required>
+              <option value="">Select department...</option>
+              <option>Engineering</option>
+              <option>Human Resources</option>
+              <option>Finance</option>
+              <option>Marketing</option>
+              <option>Sales</option>
+              <option>Operations</option>
+              <option>Customer Support</option>
+            </select>
+            <div class="err" data-for="department">Please select a department.</div>
+          </div>
+          <div class="col-6">
+            <label for="jobTitle" class="req">Position</label>
+            <input id="jobTitle" name="jobTitle" type="text" placeholder="Senior Developer" required />
+            <div class="err" data-for="jobTitle">Please enter a position.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="startDate" class="req">Date of Joining</label>
+            <input id="startDate" name="startDate" type="date" required />
+            <div class="err" data-for="startDate">Please select the date of joining.</div>
+          </div>
+          <div class="col-6">
+            <label for="employmentType" class="req">Employment Type</label>
+            <select id="employmentType" name="employmentType" required>
+              <option value="">Select type...</option>
+              <option>Full-time</option>
+              <option>Part-time</option>
+              <option>Contractor</option>
+              <option>Intern</option>
+              <option>Temporary</option>
+            </select>
+            <div class="err" data-for="employmentType">Please select a type.</div>
+          </div>
+
+          <div class="col-6">
+            <label for="grade" class="req">Grade</label>
+            <select id="grade" name="grade" required>
+              <option value="">Select grade...</option>
+              <option>G1</option>
+              <option>G2</option>
+              <option>G3</option>
+              <option>G4</option>
+              <option>G5</option>
+              <option>G6</option>
+              <option>G7</option>
+            </select>
+            <div class="err" data-for="grade">Please select a grade.</div>
+          </div>
+          <div class="col-6">
+            <label for="salary">Salary</label>
+            <input id="salary" name="salary" type="number" min="0" step="0.01" placeholder="60000" />
+            <div class="hint">Annual gross amount in your default currency.</div>
+          </div>
+          <div class="col-6">
+            <label for="status" class="req">Status</label>
+            <select id="status" name="status" required>
+              <option value="">Select status...</option>
+              <option>Active</option>
+              <option>Onboarding</option>
+              <option>On Leave</option>
+              <option>Inactive</option>
+            </select>
+            <div class="err" data-for="status">Please select a status.</div>
+          </div>
+
+          <div class="col-12">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="2" placeholder="123 Business Rd, City, Country"></textarea>
+          </div>
+
+          <div class="col-12">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Additional remarks or onboarding notes..."></textarea>
+          </div>
+
+          <div class="col-12 row">
+            <input type="checkbox" id="sendWelcome" name="sendWelcome" />
+            <label for="sendWelcome">Send welcome email</label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="admin-dashboard.html">Cancel</a>
+          <button type="submit" class="btn primary" id="submitBtn">Create Employee</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('employeeForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const saveStatus = document.getElementById('saveStatus');
+
+    function showError(input, show){
+      const el = document.querySelector(`.err[data-for="${input.id}"]`);
+      if(!el) return;
+      el.style.display = show ? 'block' : 'none';
+    }
+
+    function validateField(input){
+      if (input.willValidate === false) return true;
+      const valid = input.checkValidity();
+      showError(input, !valid);
+      return valid;
+    }
+
+    form.addEventListener('input', (e)=>{
+      if(e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement){
+        validateField(e.target);
+      }
+    });
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      saveStatus.style.display = 'none';
+
+      const inputs = form.querySelectorAll('input, select, textarea');
+      let allValid = true;
+      inputs.forEach((el)=>{ if(!validateField(el)) allValid = false; });
+      if(!allValid){
+        const firstErr = form.querySelector('.err[style*="display: block"]');
+        if(firstErr){
+          const targetId = firstErr.getAttribute('data-for');
+          const target = document.getElementById(targetId);
+          if(target) target.focus();
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      // Simulate async save. Replace with real API call (fetch) as needed.
+      setTimeout(()=>{
+        console.log('Employee created:', data);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Employee';
+        saveStatus.style.display = 'inline-block';
+        form.reset();
+      }, 900);
+    });
+  </script>
+</body>
+</html>
